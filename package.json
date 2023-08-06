@@ -1,0 +1,26 @@
+{
+  "name": "webframework",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start:build": "tsc -w",
+    "start:run": "nodemon build/index.js",
+    "start": "concurrently npm:start:*",
+    "//": "npm:start:* esto indica que todos los comandos con start:* van a ejecutarse al mismo tiempo",
+    "start:parcel": "npx parcel index.html",
+    "start:db": "json-server -w db.json"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.4.0",
+    "concurrently": "^8.2.0",
+    "nodemon": "^2.0.22"
+  },
+  "devDependencies": {
+    "buffer": "^6.0.3",
+    "parcel": "^2.9.2"
+  }
+}
