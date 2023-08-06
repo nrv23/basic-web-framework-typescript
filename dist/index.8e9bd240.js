@@ -575,48 +575,29 @@ function hmrAccept(bundle /*: ParcelRequire */ , id /*: string */ ) {
 
 },{}],"1jwFz":[function(require,module,exports) {
 var _user = require("./models/User");
-/*
-const user = new User({
-    name: "test1", age: 1
-});
-
-user.set({ name: "test3", age: 2 });
-user.on("click", () => {
-    console.log("click ejcutado")
-})
-
-user.on("change", () => {
-    console.log("change ejcutado")
-})
-
-
-// aqui ejecuta los eventos
-
-user.trigger("click");
-
-//capileacostarica
-
-user.trigger("change");
-*/ const newUser = new (0, _user.User)({
-    id: 100
-});
-newUser.set({
-    name: "new name",
-    age: 10011
-});
+/*const newUser = User.buildUser({ id: 13 });
+newUser.set({ name: "new name", age: 10011 });
 newUser.save();
 /*
 newUser.sync.save({
     id: newUser.attrs.get("id"),
     name: newUser.attrs.get("name"),
     age: newUser.attrs.get("age"),
-});*/ newUser.on("change", ()=>console.log(newUser));
-newUser.on("save", ()=>console.log("save user"));
-newUser.on("error", ()=>console.log("error "));
+});*/ /*
+newUser.on('change', () => console.log(newUser));
+newUser.on('save', () => console.log("save user"));
+newUser.on('error', () => console.log("error "));
 //newUser.trigger("change"); // con el trigger, se pasa el nombre del evento y se ejecuta el evento
 //console.log(newUser.get('name'));
+
 //newUser.set({ name: "nuevo nombre" });
-newUser.fetch();
+
+newUser.fetch();*/ /*
+const collection = new Collection<User, IUserProps>(
+    "http://localhost:3000/users",
+    (json: IUserProps) => User.buildUser(json)); // esta funcion lee un json y lo convierte y retorna a una instancia de tipo User */ const collection = (0, _user.User).buildUserCollection();
+collection.fetch();
+collection.on("change", ()=>console.log(collection));
 
 },{"./models/User":"bqOxk"}],"bqOxk":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
@@ -625,42 +606,23 @@ parcelHelpers.export(exports, "User", ()=>User);
 var _attributes = require("./Attributes");
 var _eventing = require("./Eventing");
 var _sync = require("./Sync");
-class User {
-    constructor(user){
-        this.user = user;
-        this.events = new (0, _eventing.Eventing)();
-        this.sync = new (0, _sync.Sync)("http://localhost:3000/users");
-        this.attrs = new (0, _attributes.Attributes)(this.user);
+var _model = require("./Model");
+var _collection = require("./Collection");
+const rootUrl = "http://localhost:3000/users";
+class User extends (0, _model.Model) {
+    static buildUser(user) {
+        return new User(// de la nueva instancia de User van directo a Model por eso hay acceso a todos los metodos de Model
+        new (0, _attributes.Attributes)(user), new (0, _sync.Sync)(rootUrl), new (0, _eventing.Eventing)());
     }
-    get on() {
-        // de manera que al llamar a la referencia de la funcion debe pasarle los argumentos
-        return this.events.on; // hace referencia a la funcion de la clase Eventing
+    isAdminUser() {
+        return this.get("id") === 1;
     }
-    get trigger() {
-        return this.events.trigger;
-    }
-    get get() {
-        return this.attrs.get;
-    }
-    set(user) {
-        this.attrs.set(user);
-        this.events.trigger("change");
-    }
-    fetch() {
-        const id = this.get("id");
-        if (typeof id !== "number") throw new Error("Cannot fetch without an id");
-        this.sync.fetch(id).then((response)=>{
-            this.set(response.data);
-        });
-    }
-    save() {
-        this.sync.save(this.attrs.getAll()).then((response)=>{
-            this.events.trigger("save");
-        }).catch((_)=>this.trigger("error"));
+    static buildUserCollection() {
+        return new (0, _collection.Collection)(rootUrl, (json)=>User.buildUser(json));
     }
 }
 
-},{"./Attributes":"gVlxT","./Eventing":"aWYtf","./Sync":"3qDYG","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"gVlxT":[function(require,module,exports) {
+},{"./Attributes":"gVlxT","./Eventing":"aWYtf","./Sync":"3qDYG","./Model":"1rn1E","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./Collection":"5k6BM"}],"gVlxT":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "Attributes", ()=>Attributes);
@@ -5078,6 +5040,71 @@ Object.entries(HttpStatusCode).forEach(([key, value])=>{
 });
 exports.default = HttpStatusCode;
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["g2QuX","1jwFz"], "1jwFz", "parcelRequire5397")
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"1rn1E":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "Model", ()=>Model);
+class Model {
+    constructor(attrs, sync, events){
+        this.attrs = attrs;
+        this.sync = sync;
+        this.events = events;
+        this.on = this.events.on;
+        this.trigger = this.events.trigger;
+        this.get = this.attrs.get;
+    }
+    set(user) {
+        this.attrs.set(user);
+        this.events.trigger("change");
+    }
+    fetch() {
+        const id = this.get("id");
+        if (typeof id !== "number") throw new Error("Cannot fetch without an id");
+        this.sync.fetch(id).then((response)=>{
+            this.set(response.data);
+        });
+    }
+    save() {
+        this.sync.save(this.attrs.getAll()).then((response)=>{
+            this.events.trigger("save");
+        }).catch((_)=>this.trigger("error"));
+    }
+}
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"5k6BM":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "Collection", ()=>Collection);
+var _eventing = require("./Eventing");
+var _axios = require("axios");
+var _axiosDefault = parcelHelpers.interopDefault(_axios);
+class Collection {
+    constructor(rootUrl, deserilize){
+        this.rootUrl = rootUrl;
+        this.deserilize = deserilize;
+        this.models = [];
+        this.events = new (0, _eventing.Eventing)();
+    }
+    get on() {
+        return this.events.on;
+    }
+    get trigger() {
+        return this.events.trigger;
+    }
+    fetch() {
+        (0, _axiosDefault.default).get(this.rootUrl).then((response)=>{
+            response.data.forEach((value)=>{
+                /*
+
+                    this.deserilize esta funcion devuelva una instnacia de una clase generica de forma que pueda ir almacenando en la coleccion
+                    y la funcion deserilize entra como parametro
+                */ this.models.push(this.deserilize(value));
+            });
+            this.trigger("change");
+        });
+    }
+}
+
+},{"./Eventing":"aWYtf","axios":"jo6P5","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["g2QuX","1jwFz"], "1jwFz", "parcelRequire5397")
 
 //# sourceMappingURL=index.8e9bd240.js.map

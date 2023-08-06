@@ -1,58 +1,32 @@
 import { IUserProps } from '../interfaces/IUser';
-import { Callback } from '../Types/Callback';
 import { Attributes } from './Attributes';
 import { Eventing } from './Eventing';
 import { Sync } from './Sync';
+import { Model } from './Model';
+import { Collection } from './Collection';
 
+const rootUrl = "http://localhost:3000/users";
 
-export class User {
+export class User extends Model<IUserProps> {
 
-    public events: Eventing = new Eventing();
-    public sync: Sync<IUserProps> = new Sync<IUserProps>("http://localhost:3000/users");
-    public attrs: Attributes<IUserProps>;
+    static buildUser(user: IUserProps): User {
 
-    constructor(private user: IUserProps) {
-        this.attrs = new Attributes<IUserProps>(this.user);
+        return new User( // esta clase hereda de Model entonces una vez que el constructor se ejecuta, los datos
+            // de la nueva instancia de User van directo a Model por eso hay acceso a todos los metodos de Model
+            new Attributes<IUserProps>(user),
+            new Sync<IUserProps>(rootUrl),
+            new Eventing()
+        );
     }
 
-    get on() { // al usar el get, usa el on de esta clase para llamar a una referencia de la funcion on de la clase events,
-        // de manera que al llamar a la referencia de la funcion debe pasarle los argumentos
-        return this.events.on; // hace referencia a la funcion de la clase Eventing
+    isAdminUser(): boolean {
+        return this.get("id") === 1;
     }
 
-    get trigger() {
-        return this.events.trigger;
+    static buildUserCollection(): Collection<User, IUserProps> {
+        return new Collection<User, IUserProps>(
+            rootUrl,
+            (json: IUserProps) => User.buildUser(json));
     }
 
-    get get() {
-        return this.attrs.get;
-    }
-
-    set(user: IUserProps): void {
-
-        this.attrs.set(user);
-        this.events.trigger("change");
-    }
-
-    fetch(): void {
-
-        const id = this.get("id");
-
-        if (typeof id !== 'number') { // si el id no existe
-            throw new Error("Cannot fetch without an id");
-        }
-
-
-        this.sync.fetch(id).then((response => {
-            this.set(response.data);
-        }))
-    }
-
-    save(): void {
-        this.sync.save(this.attrs.getAll())
-            .then(response => {
-                this.events.trigger("save");
-            })
-            .catch(_ => this.trigger("error"));
-    }
 }

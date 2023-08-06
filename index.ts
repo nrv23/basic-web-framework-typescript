@@ -1,29 +1,9 @@
 import { User } from "./models/User";
-/*
-const user = new User({
-    name: "test1", age: 1
-});
-
-user.set({ name: "test3", age: 2 });
-user.on("click", () => {
-    console.log("click ejcutado")
-})
-
-user.on("change", () => {
-    console.log("change ejcutado")
-})
+import { Collection } from './models/Collection';
+import { IUserProps } from './interfaces/IUser';
 
 
-// aqui ejecuta los eventos
-
-user.trigger("click");
-
-//capileacostarica
-
-user.trigger("change");
-*/
-
-const newUser = new User({ id: 100 });
+/*const newUser = User.buildUser({ id: 13 });
 newUser.set({ name: "new name", age: 10011 });
 newUser.save();
 /*
@@ -32,7 +12,7 @@ newUser.sync.save({
     name: newUser.attrs.get("name"),
     age: newUser.attrs.get("age"),
 });*/
-
+/*
 newUser.on('change', () => console.log(newUser));
 newUser.on('save', () => console.log("save user"));
 newUser.on('error', () => console.log("error "));
@@ -41,4 +21,12 @@ newUser.on('error', () => console.log("error "));
 
 //newUser.set({ name: "nuevo nombre" });
 
-newUser.fetch();
+newUser.fetch();*/
+/*
+const collection = new Collection<User, IUserProps>(
+    "http://localhost:3000/users",
+    (json: IUserProps) => User.buildUser(json)); // esta funcion lee un json y lo convierte y retorna a una instancia de tipo User */
+
+const collection = User.buildUserCollection();
+collection.fetch();
+collection.on('change', () => console.log(collection));
