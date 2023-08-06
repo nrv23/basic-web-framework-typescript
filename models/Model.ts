@@ -1,8 +1,9 @@
 import { AxiosPromise } from 'axios';
 import { Callback } from "../Types/Callback";
+import { HasId } from '../interfaces/IHasId';
 
 interface IModelAttrs<T> {
-    get<K extends keyof T>(key: K): T[K];
+    get<K extends keyof T>(key: K): T[K]; // la intrfaz K debe ser una propiedad de la intrfaz T
     set(update: T): void;
     getAll(): T;
 }
@@ -17,11 +18,7 @@ interface IEvents {
     trigger(eventName: string): void;
 }
 
-// reestriccion para una intrfaz generica
 
-interface HasId {
-    id?: number;
-}
 
 
 export class Model<T extends HasId> { //Model<T extends HasId> indica que la interfaz T hereda la propiedad id de la interfaz HasId

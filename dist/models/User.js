@@ -19,5 +19,9 @@ class User extends Model_1.Model {
     static buildUserCollection() {
         return new Collection_1.Collection(rootUrl, (json) => User.buildUser(json));
     }
+    setRandomAge() {
+        const age = Math.round(Math.random() * 100);
+        this.set({ age });
+    }
 }
 exports.User = User;
