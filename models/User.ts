@@ -27,4 +27,32 @@ export class User {
     get get() {
         return this.attrs.get;
     }
+
+    set(user: IUserProps): void {
+
+        this.attrs.set(user);
+        this.events.trigger("change");
+    }
+
+    fetch(): void {
+
+        const id = this.get("id");
+
+        if (typeof id !== 'number') { // si el id no existe
+            throw new Error("Cannot fetch without an id");
+        }
+
+
+        this.sync.fetch(id).then((response => {
+            this.set(response.data);
+        }))
+    }
+
+    save(): void {
+        this.sync.save(this.attrs.getAll())
+            .then(response => {
+                this.events.trigger("save");
+            })
+            .catch(_ => this.trigger("error"));
+    }
 }

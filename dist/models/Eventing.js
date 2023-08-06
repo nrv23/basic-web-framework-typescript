@@ -4,20 +4,20 @@ exports.Eventing = void 0;
 class Eventing {
     constructor() {
         this.events = {};
-    }
-    on(eventName, callback) {
-        const handlers = this.events[eventName] || [];
-        handlers.push(callback);
-        this.events[eventName] = handlers;
-    }
-    trigger(eventName) {
-        const handlers = this.events[eventName];
-        if (!handlers || !handlers.length)
-            return;
-        // ejecutar aqui los eventos 
-        handlers.forEach(callback => {
-            callback();
-        });
+        this.on = (eventName, callback) => {
+            const handlers = this.events[eventName] || [];
+            handlers.push(callback);
+            this.events[eventName] = handlers;
+        };
+        this.trigger = (eventName) => {
+            const handlers = this.events[eventName];
+            if (!handlers || !handlers.length)
+                return;
+            // ejecutar aqui los eventos 
+            handlers.forEach(callback => {
+                callback();
+            });
+        };
     }
 }
 exports.Eventing = Eventing;
