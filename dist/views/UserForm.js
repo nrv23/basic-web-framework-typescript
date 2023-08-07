@@ -5,6 +5,9 @@ const View_1 = require("./View");
 class UserForm extends View_1.View {
     constructor() {
         super(...arguments);
+        this.onSaveModelClick = () => {
+            this.model.save();
+        };
         this.onSetAgeClick = () => {
             this.model.setRandomAge();
         };
@@ -14,22 +17,23 @@ class UserForm extends View_1.View {
         };
     }
     eventsMap() {
+        /*
+        [key: string]: () => void
+        indica que la llave es de tipo string y el valor de la llave una funcion que no retorna nada
+        */
         return {
             'click:.set-age': this.onSetAgeClick,
-            'click:.set-name': this.onChangeNameClick
+            'click:.set-name': this.onChangeNameClick,
+            'click:.save-model': this.onSaveModelClick
         };
     }
     template() {
         return `
             <div>
-                <h1>
-                    User Form
-                </h1>
-                <div>User name: ${this.model.get("name")}</div>
-                <div>User age: ${this.model.get("age")}</div>
-                <input/>
+                <input placeholder=${this.model.get("name")} />
                 <button class="set-name">Change Name</button>
                 <button class="set-age">Set Random Age </button>
+                <button class="save-model">save</button>
             </div>
         `;
     }

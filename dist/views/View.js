@@ -5,10 +5,28 @@ class View {
     constructor(parent, model) {
         this.parent = parent;
         this.model = model;
+        this.regions = {};
         this.bindModel();
     }
+    regionsMap() {
+        return {};
+    }
+    eventsMap() { return {}; }
+    ; // esta funcion es opcional de implementar en la clase que ña hereda
     bindModel() {
         this.model.on("change", () => this.render());
+    }
+    mapRegions(fragment) {
+        const regionsMap = this.regionsMap();
+        for (const key in regionsMap) {
+            const selector = regionsMap[key];
+            const element = fragment.querySelector(selector);
+            if (element) {
+                this.regions[key] = element;
+            }
+        }
+    }
+    onRender() {
     }
     render() {
         this.parent.innerHTML = ''; // limpia el documento html 
@@ -17,6 +35,10 @@ class View {
         templateElement.innerHTML = this.template();
         // agregar los eventos al template html
         this.bindEvents(templateElement.content);
+        //
+        //
+        this.mapRegions(templateElement.content);
+        this.onRender();
         // agregar el template al body html
         this.parent.append(templateElement.content);
     }
